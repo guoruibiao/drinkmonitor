@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能饮水记录</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录/注册界面 -->
+        <div id="auth-container">
+            <div class="auth-box">
+                <h2>欢迎使用智能饮水记录</h2>
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')">登录</button>
+                    <button class="tab-btn" onclick="switchTab('register')">注册</button>
+                </div>
+                
+                <!-- 登录表单 -->
+                <div id="login-form" class="auth-form active">
+                    <input type="text" id="login-username" placeholder="用户名" required>
+                    <input type="password" id="login-password" placeholder="密码" required>
+                    <button onclick="login()">登录</button>
+                    <div class="error-msg" id="login-error"></div>
+                </div>
+                
+                <!-- 注册表单 -->
+                <div id="register-form" class="auth-form">
+                    <input type="text" id="register-username" placeholder="用户名" required>
+                    <input type="password" id="register-password" placeholder="密码" required>
+                    <button onclick="register()">注册</button>
+                    <div class="error-msg" id="register-error"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主应用界面 -->
+        <div id="main-container" style="display: none;">
+            <header>
+                <h1>智能饮水记录</h1>
+                <div class="user-info">
+                    <span id="current-user"></span>
+                    <button onclick="logout()">登出</button>
+                </div>
+            </header>
+            
+            <main>
+                <!-- 饮水操作区域 -->
+                <section class="water-control">
+                    <div class="current-total">
+                        <h3>今日已饮水</h3>
+                        <div class="total-display">
+                            <span id="water-total">0</span>
+                            <span class="unit">毫升</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-panel">
+                        <h4>添加饮水</h4>
+                        <input type="range" id="water-slider" min="0" max="500" value="200" step="10">
+                        <div class="slider-info">
+                            <span>0</span>
+                            <span id="slider-value">200</span>
+                            <span>500</span>
+                        </div>
+                        <div class="buttons">
+                            <button onclick="addWater()">添加</button>
+                            <button onclick="resetSlider()">重置</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 数据可视化区域 -->
+                <section class="data-visualization">
+                    <div class="chart-controls">
+                        <h3>饮水趋势</h3>
+                        <div class="period-selector">
+                            <button class="period-btn active" onclick="changePeriod('day')">当天</button>
+                            <button class="period-btn" onclick="changePeriod('week')">当周</button>
+                            <button class="period-btn" onclick="changePeriod('month')">当月</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="water-chart"></canvas>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
