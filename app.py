@@ -186,19 +186,33 @@ def get_user_data():
     now = datetime.now()
     filtered_data = []
     
+    # 设置开始时间和结束时间
     if period == 'day':
         start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = now.replace(hour=23, minute=59, second=59, microsecond=999999)
     elif period == 'week':
+        # 本周一
         start_time = now - timedelta(days=now.weekday())
         start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        # 本周日
+        end_time = start_time + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
     elif period == 'month':
+        # 本月1日
         start_time = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # 下月1日减1微秒，即为当月最后一刻
+        if now.month == 12:
+            end_time = start_time.replace(year=now.year + 1, month=1) - timedelta(microseconds=1)
+        else:
+            end_time = start_time.replace(month=now.month + 1) - timedelta(microseconds=1)
     else:
+        # 默认当天
         start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = now.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     for record in drink_data[username]:
         record_time = datetime.fromisoformat(record['time'])
-        if record_time >= start_time:
+        # 确保记录时间在开始时间和结束时间之间（包括边界）
+        if start_time <= record_time <= end_time:
             filtered_data.append(record)
     
     return jsonify({'data': filtered_data}), 200
@@ -216,43 +230,51 @@ def get_all_users_data():
     with open(DATA_FILE, 'r') as f:
         drink_data = json.load(f)
     
-    # 加载用户信息，获取用户ID到用户名的映射
-    with open(USERS_FILE, 'r') as f:
-        users = json.load(f)
-    
-    # 创建ID到用户名的映射字典
-    id_to_username = {}
-    for username, password_hash in users.items():
-        # 查找sessions中与该password_hash匹配的会话，获取真实用户名
-        for session_token, session_data in sessions.items():
-            if 'password' in session_data.keys() and hashlib.sha256(session_data['password'].encode()).hexdigest() == password_hash:
-                id_to_username[username] = session_data['username']
-                break
+    # 创建ID到显示名称的映射字典
+    id_to_display_name = {
+        '123': '坏狗狗',
+        '111': '用户111',
+        '222': '用户222'
+    }
     
     # 根据时间段过滤数据
     now = datetime.now()
     result = {}
     
+    # 设置开始时间和结束时间
     if period == 'day':
         start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = now.replace(hour=23, minute=59, second=59, microsecond=999999)
     elif period == 'week':
+        # 本周一
         start_time = now - timedelta(days=now.weekday())
         start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        # 本周日
+        end_time = start_time + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
     elif period == 'month':
+        # 本月1日
         start_time = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # 下月1日减1微秒，即为当月最后一刻
+        if now.month == 12:
+            end_time = start_time.replace(year=now.year + 1, month=1) - timedelta(microseconds=1)
+        else:
+            end_time = start_time.replace(month=now.month + 1) - timedelta(microseconds=1)
     else:
+        # 默认当天
         start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = now.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     for user_id, records in drink_data.items():
         filtered_records = []
         for record in records:
             record_time = datetime.fromisoformat(record['time'])
-            if record_time >= start_time:
+            # 确保记录时间在开始时间和结束时间之间（包括边界）
+            if start_time <= record_time <= end_time:
                 filtered_records.append(record)
         if filtered_records:
-            # 使用真实用户名，如果找不到则使用ID
-            username = id_to_username.get(user_id, user_id)
-            result[username] = filtered_records
+            # 使用显示名称，如果找不到则使用ID
+            display_name = id_to_display_name.get(user_id, user_id)
+            result[display_name] = filtered_records
     
     return jsonify(result), 200
 
