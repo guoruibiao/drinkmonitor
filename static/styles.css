@@ -171,6 +171,8 @@ main {
 .current-total {
     text-align: center;
     margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .current-total h3 {
@@ -182,6 +184,27 @@ main {
     font-size: 48px;
     font-weight: bold;
     color: #667eea;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.cumulative-total {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.cumulative-total h4 {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.cumulative-display {
+    font-size: 32px;
+    font-weight: bold;
+    color: #764ba2;
     display: flex;
     justify-content: center;
     align-items: baseline;
@@ -333,6 +356,10 @@ main {
         font-size: 36px;
     }
     
+    .cumulative-display {
+        font-size: 28px;
+    }
+    
     .unit {
         font-size: 20px;
     }
@@ -358,6 +385,10 @@ main {
     
     .total-display {
         font-size: 32px;
+    }
+    
+    .cumulative-display {
+        font-size: 24px;
     }
     
     .period-selector {
