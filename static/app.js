@@ -193,8 +193,8 @@ async function addWater() {
         const data = await response.json();
         
         if (response.ok) {
-            // 更新显示的总量
-            document.getElementById('water-total').textContent = data.total;
+            // 重新加载总量数据以获取最新的当日和累计数据
+            await loadTotal();
             
             // 重置滑块
             resetSlider();
@@ -240,7 +240,8 @@ async function loadTotal() {
         const data = await response.json();
         
         if (response.ok) {
-            document.getElementById('water-total').textContent = data.total;
+            document.getElementById('today-water-total').textContent = data.today_total;
+            document.getElementById('cumulative-water-total').textContent = data.total;
         }
     } catch (error) {
         console.error('加载总量错误:', error);
@@ -332,16 +333,25 @@ function updateChart(userData) {
     
     // 为每个用户创建数据集
     for (const [username, records] of userRecordsMap) {
-        // 创建记录映射，方便查找
-        const recordMap = new Map();
-        records.forEach(record => {
-            recordMap.set(record.time, record.total);
-        });
+        // 按时间排序记录
+        const sortedRecords = [...records].sort((a, b) => new Date(a.time) - new Date(b.time));
         
-        // 为每个时间点找到对应的total值
-        const dataPoints = sortedTimePoints.map(timeStr => {
-            return recordMap.get(timeStr) || null; // 如果该时间点没有数据，使用null
-        });
+        // 为每个时间点计算累加的amount值
+        const dataPoints = [];
+        let accumulatedAmount = 0;
+        let recordIndex = 0;
+        
+        // 对每个时间点，计算到该时间点为止的累计饮水量
+        for (const timeStr of sortedTimePoints) {
+            // 累加所有时间小于等于当前时间点的记录的amount
+            while (recordIndex < sortedRecords.length && sortedRecords[recordIndex].time <= timeStr) {
+                accumulatedAmount += sortedRecords[recordIndex].amount;
+                recordIndex++;
+            }
+            
+            // 如果当前时间点有记录，使用累加值；否则保持上一个累加值
+            dataPoints.push(accumulatedAmount);
+        }
         
         datasets.push({
             label: username,
