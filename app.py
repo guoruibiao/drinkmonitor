@@ -292,12 +292,36 @@ def get_total():
         drink_data = json.load(f)
     
     if username not in drink_data or not drink_data[username]:
-        return jsonify({'total': 0}), 200
+        return jsonify({'total': 0, 'today_total': 0}), 200
     
-    # 获取最新记录的总量
+    # 获取累计总量（最新记录的total值）
     latest_record = drink_data[username][-1]
+    cumulative_total = latest_record['total']
     
-    return jsonify({'total': latest_record['total']}), 200
+    # 计算今日饮水量
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_total = 0
+    
+    # 找出今天的第一条记录
+    today_records = []
+    for record in reversed(drink_data[username]):
+        record_time = datetime.fromisoformat(record['time'])
+        if record_time >= today_start:
+            today_records.append(record)
+        else:
+            break
+    
+    # 如果今天有记录，计算今天的饮水量
+    if today_records:
+        # 如果今天的第一条记录就是所有记录的第一条，那么today_total就是latest_record['total']
+        if len(drink_data[username]) == len(today_records):
+            today_total = cumulative_total
+        else:
+            # 否则，今天的总量 = 最新记录的total - 昨天最后一条记录的total
+            yesterday_last_record = drink_data[username][-len(today_records)-1]
+            today_total = cumulative_total - yesterday_last_record['total']
+    
+    return jsonify({'total': cumulative_total, 'today_total': today_total}), 200
 
 @app.route('/')
 def serve_index():
